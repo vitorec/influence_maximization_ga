@@ -1,5 +1,3 @@
-import igraph as ig
-
 from ga_helper import *
 
 
@@ -33,7 +31,6 @@ class Population:
 	def __init__(self):
 		self.chromossomes = []
 
-	# chromossomes: seeds
 	def initialize(self, chromossomes):
 		self.chromossomes = chromossomes
 
@@ -80,7 +77,6 @@ class Population:
 
 class GA(object):
 
-	# initialize variables and lists
 	def __init__(self):
 
 		self.g = None
@@ -154,7 +150,7 @@ class GA(object):
 		chromossomes = []
 		population = Population()
 		individuals = 0
-		# for i in range(self.population_size):
+
 		while individuals < self.population_size:
 			chromossome = Chromossome()
 			seeds = self.seeds[:]
@@ -198,14 +194,12 @@ class GA(object):
 		Calculates the inital fitness of the entire population
 		"""
 
-		# loop through population and calculate fitness
 		self.population.calculate_fitness(self.g, self.model, iterations=self.iterations, p=self.p)
 		self.population_fitness = self.population.get_fitness()
 		best = max(self.population_fitness, key=itemgetter(1))
 		self.bests.append(best[1])
 		self.best_individual = self.population.chromossomes[best[0]]
 
-	# mutate children after certain condition
 	def mutation(self, ch: Chromossome):
 		"""
 		Performs the mutation on an individual by gene replacement
@@ -222,7 +216,6 @@ class GA(object):
 
 		return ch
 
-	# crossover two population to produce two children by miixing them under random ration each time
 	def crossover(self, parent1, parent2, generation):
 		"""
 		Performs the crossover of two individuals
@@ -253,6 +246,19 @@ class GA(object):
 		return child1, child2
 
 	def parents_selection(self, k=2):
+		"""
+		Selects the best of the k individuals the be the next parents
+
+		Args:
+			k (int): the number of competitors
+
+		Returns:
+			parent1 (Chromossome): the first parent individual
+			idx1 (Chromossome): the index of the first parent individual
+			parent2 (Chromossome): the second parent individual
+			idx2 (Chromossome): the index of the second parent individual
+		"""
+
 		candidates = self.population_fitness[:]
 		competitors = random.sample(candidates, k)
 		winner = max(competitors, key=itemgetter(1))
@@ -264,14 +270,12 @@ class GA(object):
 		parent2, idx2 = self.population.chromossomes[winner[0]], winner[0]
 		return parent1, idx1, parent2, idx2
 
-	# run the GA algorithm
 	def run(self):
+		"""
+		Run the GA and shows the results
+		"""
 
-		# run the evaluation once
-		# self.evaluation()
-		# for i in range(self.ngen):
 		gen = 0
-		c = 0
 		while max(self.bests) < self.n and gen < self.ngen:
 			gen += 1
 			print("-- Generation %i --" % gen)
@@ -285,18 +289,16 @@ class GA(object):
 			while self.has(child1) and self.has(child2):
 				child1, child2 = self.crossover(parent1, parent2, gen)
 
-				# Mutation of the new individuals
+				# mutation of the new individuals
 				self.mutation(child1)
 				self.mutation(child2)
 
 				child1.calculate_fitness(self.g, self.model, self.iterations, self.p)
 				child2.calculate_fitness(self.g, self.model, self.iterations, self.p)
 
-				c += 1
 			self.eletism(child1, child2, idx1, idx2)
 			self.fitness()
 			self.population.statistics()
-		# print('>> ', c)
 
 		print('Final population')
 		self.population.show()
@@ -307,9 +309,6 @@ class GA(object):
 		print('Best individual')
 		print('# {:<30} {:>40} {:>10} {:>10} {:>10} {:>10} {:>10}'.format('seeds', '->', 'mean', 'min', 'max', 'stddev', 'gen'))
 		print(self.best_individual)
-
-	# print('-------------------------\n')
-	# print('replacements: ', self.replacements)
 
 	def eletism(self, ch1, ch2, idx1=None, idx2=None):
 		if self.eletism_method == 'fitness':
@@ -324,7 +323,7 @@ class GA(object):
 		Args:
 			ch (list of int or Chromossome): The individual
 
-		Return:
+		Returns:
 			True if the population has ch
 		"""
 		return ch in self.population.chromossomes
