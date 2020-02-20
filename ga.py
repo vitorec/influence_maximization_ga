@@ -86,6 +86,7 @@ class GA(object):
 		self.model = 'icm'
 		self.iterations = 10
 		self.population = Population()
+		self.new_population = Population()
 		self.population_fitness = []
 		self.bests = []
 		self.best_individual = Chromossome()
@@ -100,15 +101,6 @@ class GA(object):
 		self.replacements = 0
 		self.eletism_method = 'fitness'
 
-	def initialize(self):
-		"""
-		Creates the initial population and shows it
-		"""
-		self.initial_population()
-		self.evaluation()
-		self.population.show()
-
-	# set the details of this problem
 	def properties(self, g, seeds, genes, population_size, random_seeds=0.6, model='icm', selection='fitness', iterations=10, ngen=50, p=0.01, pm=0.05):
 		"""
 		Initialize the properties of the GA.
@@ -141,6 +133,14 @@ class GA(object):
 		self.p = p
 		self.pm = pm
 		self.initialize()
+
+	def initialize(self):
+		"""
+		Creates the initial population and shows it
+		"""
+		self.initial_population()
+		self.evaluation()
+		self.population.show()
 
 	def initial_population(self):
 		"""
@@ -206,7 +206,7 @@ class GA(object):
 
 		Parameters
 		----------
-			ch (Chromossome) : An single individual
+			ch (Chromossome) : A single individual
 		"""
 
 		for i in range(len(ch)):
@@ -220,14 +220,15 @@ class GA(object):
 		"""
 		Performs the crossover of two individuals
 
-		Args:
+		Parameters
 		----------
-			parent1 (Chromossome) : An single individual
-			parent2 (Chromossome) : An single individual
+			parent1 (Chromossome) : A single individual
+			parent2 (Chromossome) : A single individual
 
-		Returns:
+		Returns
 		----------
-			c
+			child1 (Chromossome) : The first brand new child individual
+			child2 (Chromossome) : The second brand new child individual
 		"""
 		threshold = random.randint(1, self.genes - 1)
 
@@ -240,8 +241,8 @@ class GA(object):
 		replace_duplicates(ch1, m1, self.seeds, self.vertices)
 		replace_duplicates(ch2, m2, self.seeds, self.vertices)
 
-		child1 = Chromossome(ch1)
-		child2 = Chromossome(ch2)
+		child1 = Chromossome(ch1, generation=generation)
+		child2 = Chromossome(ch2, generation=generation)
 
 		return child1, child2
 
@@ -249,7 +250,7 @@ class GA(object):
 		"""
 		Selects the best of the k individuals the be the next parents
 
-		Args:
+		Parameters
 			k (int): the number of competitors
 
 		Returns:
@@ -279,51 +280,64 @@ class GA(object):
 		while max(self.bests) < self.n and gen < self.ngen:
 			gen += 1
 			print("-- Generation %i --" % gen)
+			chomossomes = []
 
-			parent1, idx1, parent2, idx2 = self.parents_selection(k=2)
+			while len(chomossomes) < self.population_size:
+				parent1, idx1, parent2, idx2 = self.parents_selection(k=2)
 
-			child1 = self.population.chromossomes[0]
-			child2 = self.population.chromossomes[1]
-
-			# avoid duplications of individuals in the population
-			while self.has(child1) and self.has(child2):
 				child1, child2 = self.crossover(parent1, parent2, gen)
 
 				# mutation of the new individuals
 				self.mutation(child1)
 				self.mutation(child2)
 
-				child1.calculate_fitness(self.g, self.model, self.iterations, self.p)
-				child2.calculate_fitness(self.g, self.model, self.iterations, self.p)
+				chomossomes.append(child1)
+				chomossomes.append(child2)
 
-			self.eletism(child1, child2, idx1, idx2)
-			self.fitness()
+			self.new_population.initialize(chomossomes)
+			self.new_population.calculate_fitness(self.g, self.model, iterations=self.iterations, p=self.p)
+
+			self.eletism()
 			self.population.statistics()
 
 		print('Final population')
 		self.population.show()
 		print('-------------------------\n')
-		print('')
-		print(list(set(self.bests)))
+		print(sorted(self.bests))
+		print(sorted(list(set(self.bests))))
 		print('-------------------------\n')
 		print('Best individual')
 		print('# {:<30} {:>40} {:>10} {:>10} {:>10} {:>10} {:>10}'.format('seeds', '->', 'mean', 'min', 'max', 'stddev', 'gen'))
 		print(self.best_individual)
 
-	def eletism(self, ch1, ch2, idx1=None, idx2=None):
-		if self.eletism_method == 'fitness':
-			fitness_eletism(self.population, ch1, ch2)
-		else:
-			parents_eletism(self.population, ch1, ch2, idx1=idx1, idx2=idx2)
+	def eletism(self):
+		"""
+		Replace the entire population by the new one, retaining the best individual
+		"""
+		self.population_fitness = self.population.get_fitness()
+
+		new_population_fitness = self.new_population.get_fitness()
+
+		best = max(self.population_fitness, key=itemgetter(1))
+		worst = min(new_population_fitness, key=itemgetter(1))
+
+		self.new_population.chromossomes[worst[0]] = self.population.chromossomes[best[0]]
+		self.population.chromossomes = self.new_population.chromossomes[:]
+
+		self.population_fitness = self.population.get_fitness()
+		new_best = max(self.population_fitness, key=itemgetter(1))
+
+		self.bests.append(new_best[1])
+		self.best_individual = self.population.chromossomes[new_best[0]]
 
 	def has(self, ch):
 		"""
 		Check if the population has an individual
 
-		Args:
+		Parameters
 			ch (list of int or Chromossome): The individual
 
-		Returns:
+		Returns
 			True if the population has ch
 		"""
 		return ch in self.population.chromossomes

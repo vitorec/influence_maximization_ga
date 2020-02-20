@@ -1,5 +1,4 @@
 import random
-from _operator import itemgetter
 from operator import itemgetter
 from statistics import mean, stdev
 

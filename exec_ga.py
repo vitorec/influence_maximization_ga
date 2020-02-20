@@ -10,18 +10,13 @@ networks = [
 	'datasets/CA-GrQc.gml',
 	'datasets/CA-HepTh.gml',
 	'datasets/CA-HepPh.gml',
-	'datasets/CA-AstroPh.gml',
-	'datasets/CA-CondMat.gml',
-	'datasets/soc-gemsec-RO.gml',
-	'datasets/soc-gemsec-HR.gml',
-	'datasets/soc-facebook-wosn.gml',
-	'datasets/livemocha.gml',
+	'datasets/CA-CondMat.gml'
 ]
 
 centralities_path = 'centralities/'
 seeds_path = 'seeds/'
 
-network = networks[2]
+network = networks[4]
 
 print(network)
 
@@ -55,7 +50,7 @@ it = 10
 selection = 'parents'
 
 # numero de geracoes
-ngen = 10
+ngen = 200
 
 # probabilidade de difusao
 p = 0.01
