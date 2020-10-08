@@ -1,4 +1,6 @@
 import os
+from collections import Counter
+from functools import reduce
 from os import sep as separator
 
 
@@ -25,3 +27,22 @@ def binary_search(item_list, item):
 				first = mid + 1
 	return found
 
+
+def get_neighbors(g, seeds, in_seeds=False, distance=1):
+	neighborhood = g.neighborhood(seeds, mindist=distance)
+	nb_set = set(reduce(lambda x, y: x + y, neighborhood))
+	if not in_seeds:
+		nb_set = list(nb_set - set(seeds))
+	nb = sorted(list(nb_set))
+	return nb
+
+
+def get_occurrences(g, seeds, in_seeds=False, distance=1):
+	neighborhood = g.neighborhood(seeds, mindist=distance)
+	c = Counter(x for xs in neighborhood for x in xs)
+	if not in_seeds:
+		for seed in seeds:
+			if seed in c:
+				c.pop(seed)
+	occurrences = dict(sorted(c.items(), key=lambda i: i[0]))
+	return occurrences

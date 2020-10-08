@@ -5,6 +5,7 @@ from statistics import mean, stdev
 import numpy as np
 
 from diffusion import icm, ltm
+from utils import get_occurrences
 
 
 def calculate_fitness(g, seeds, model, iterations=10, p=0.01):
@@ -100,3 +101,11 @@ def fitness_eletism(population, ch1, ch2):
 def parents_eletism(population, ch1, ch2, idx1, idx2):
 	population.chromossomes[idx1] = ch1
 	population.chromossomes[idx2] = ch2
+
+
+def edv(g, seeds, p):
+	dv = len(seeds)
+	occurrences = get_occurrences(g, seeds)
+	for v, tau in occurrences.items():
+		dv += 1 - (1 - p) ** tau
+	return dv
