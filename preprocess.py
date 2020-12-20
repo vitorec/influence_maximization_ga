@@ -24,6 +24,7 @@ def main():
 	path, name, extension, uri = parse_file_path(network)
 
 	print(network)
+	g = None
 	try:
 		extension = 'edgelist' if extension == 'txt' else extension
 		if extension == 'pkl':

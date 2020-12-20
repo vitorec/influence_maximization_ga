@@ -1,8 +1,4 @@
 # Created by .ignore support plugin (hsz.mobi)
-datasets/*.gml
-centralities_bkp
-seeds_bkp
-__pycache__/*
 sh/
 .idea
 *.ipynb

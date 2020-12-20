@@ -1,0 +1,11 @@
+numpy==1.19.4
+plotly==4.13.0
+scipy==1.5.4
+seaborn==0.11.0
+networkx==2.5
+leidenalg==0.8.3
+pandas==1.1.4
+matplotlib==3.3.3
+python_igraph==0.8.3
+scikit_learn==0.23.2
+git+https://github.com/changyaochen/rbo.git@master#egg=rbo
